@@ -1,0 +1,61 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        working_dir: /var/www/
+        volumes:
+            - ./:/var/www
+        depends_on:
+            - db
+            - redis
+        networks:
+            - laravel
+    
+    nginx:
+        image: nginx:alpine
+        restart: unless-stopped
+        ports:
+            - "8000:80"
+        volumes:
+            - ./:/var/www
+            - ./docker/nginx/:/etc/nginx/conf.d/
+        networks:
+            - laravel
+
+    db:
+        image: mysql:8.0.40-debian
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: '${DB_DATABASE}'
+            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+            # Descomente se necessario
+            # MYSQL_PASSWORD: '${DB_PASSWORD}'
+            # MYSQL_USER: '${DB_USERNAME}'
+        command:
+            - --character-set-server=utf8mb4
+            - --collation-server=utf8mb4_unicode_ci
+        volumes:
+            - 'db:/var/lib/mysql'
+        ports:
+            - "3306:3306"
+        networks:
+            - laravel
+
+    redis:
+        image: redis:latest
+        volumes:
+            - 'redis:/data'
+        networks:
+            - laravel
+
+volumes:
+    db:
+        driver: local
+    redis:
+        driver: local
+
+networks:
+    laravel:
+        driver: bridge
