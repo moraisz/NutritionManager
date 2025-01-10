@@ -28,5 +28,5 @@ jobs:
         ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_SSH_USER }}@${{ secrets.GCP_VM_IP }} << 'EOF'
           cd /app/NutritionManager
           git pull origin main
-          docker compose up --build
+          sudo docker compose up --build
         EOF
