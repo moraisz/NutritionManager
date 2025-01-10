@@ -21,7 +21,7 @@ jobs:
     - name: Send .env to VM
       run: |
         echo "${{ secrets.ENV_FILE }}" > .env
-        scp -o StrictHostKeyChecking=no .env ${{ secrets.GCP_SSH_USER }}@${{ secrets.GCP_VM_IP }}:/home/${{ secrets.GCP_SSH_USER }}/NutritionManager/.env
+        scp -o StrictHostKeyChecking=no .env ${{ secrets.GCP_SSH_USER }}@${{ secrets.GCP_VM_IP }}:/home/${{ secrets.GCP_SSH_USER }}/~/.env
 
     - name: Deploy to VM
       run: |
