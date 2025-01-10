@@ -10,21 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checar código
-      uses: actions/checkout@v3
-
-    - name: Configurar SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.GCP_SSH_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.GCP_VM_IP }} >> ~/.ssh/known_hosts
-
     - name: Fazer deploy
       run: |
         ssh ${{ secrets.GCP_SSH_USER }}@${{ secrets.GCP_VM_IP }} << 'EOF'
-          cd /caminho/do/projeto || git clone git@github.com:usuario/repo.git /caminho/do/projeto
-          cd /caminho/do/projeto
+          git clone git@github.com:moraisz/NutritionManager.git /app/
+          cd /app/
           git pull origin main
-          docker-compose up -d --build  # Troque pelo comando necessário
+          docker-compose up -d --build
         EOF
