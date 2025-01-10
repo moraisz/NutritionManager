@@ -1,4 +1,4 @@
-name: Deploy para GCP
+name: Deploy to VM
 
 on:
   push:
@@ -8,13 +8,25 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Fazer deploy
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.GCP_SSH_KEY }}
+
+    - name: Send .env to VM
       run: |
-        ssh ${{ secrets.GCP_SSH_USER }}@${{ secrets.GCP_VM_IP }} << 'EOF'
-          git clone git@github.com:moraisz/NutritionManager.git /app/
-          cd /app/
+        echo "${{ secrets.ENV_FILE }}" > .env
+        scp -o StrictHostKeyChecking=no .env ${{ secrets.GCP_SSH_USER }}@${{ secrets.GCP_VM_IP }}:/app/NutritionManager
+
+    - name: Deploy to VM
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_SSH_USER }}@${{ secrets.GCP_VM_IP }} << 'EOF'
+          cd /app/NutritionManager
           git pull origin main
-          docker-compose up -d --build
+          docker compose up --build
         EOF
