@@ -21,16 +21,20 @@ jobs:
     - name: Send .env to VM
       run: |
         echo "${{ secrets.ENV_FILE }}" > .env
-        scp -o StrictHostKeyChecking=no .env ${{ secrets.GCP_SSH_USER }}@${{ secrets.GCP_VM_IP }}:/app/NutritionManager
+        scp -o StrictHostKeyChecking=no .env ${{ secrets.GCP_SSH_USER }}@${{ secrets.GCP_VM_IP }}:/home/deploy/NutritionManager
 
     - name: Deploy to VM
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.GCP_SSH_USER }}@${{ secrets.GCP_VM_IP }} << 'EOF'
-          cd /app/NutritionManager
+          cd /home/deploy/NutritionManager
           git pull origin main
           sudo docker compose up -d --build
         EOF
     
     - name: Run Composer Install inside container
       run: |
-        docker exec -it my-container bash -c "composer install"
+        sudo docker compose exec app sh -c "composer install"
+
+    - name: Run Npm Install inside container
+      run: |
+        sudo docker compose exec app sh -c "npm install"
